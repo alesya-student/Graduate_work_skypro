@@ -17,7 +17,7 @@ class Main:
         self.driver.implicitly_wait(5)
         self.driver.maximize_window
 
-    @allure.step("Обрабатываем капчу, если она появляется.")
+    @allure.step("Обрабатываем капчу, если searchона появляется.")
     def captcha(self):
         """
         Данный метод обрабатывает капчу.
@@ -37,7 +37,7 @@ class Main:
         self.driver.find_element(By.CSS_SELECTOR, 'button[class="styles_loginButton__LWZQp"]').click()
 
     @allure.step('Ввод невалидного названия фильма в строку поиска и нажать "поиск".')
-    def serch(self, title: str) -> str: # задали параметр, то что будем вводить в строку поиска  
+    def search(self, title: str) -> str: # задали параметр, то что будем вводить в строку поиска  
         self.driver.find_element(By.CSS_SELECTOR, 'input#find_film').send_keys(title)
         self.driver.find_element(By.CSS_SELECTOR, 'input.el_18.submit.nice_button').click()
         return str(title)
@@ -49,7 +49,7 @@ class Main:
         return str(countrol_title)
     
     @allure.step('Поиск фильма по нескольким параметрам (название + год).')
-    def serch_title_year(self, title: str, year: str):
+    def search_title_year(self, title: str, year: str):
         title = self.driver.find_element(By.CSS_SELECTOR, 'input#find_film').send_keys(title)
         year = self.driver.find_element(By.CSS_SELECTOR, 'input#year').send_keys(year)
         self.driver.find_element(By.CSS_SELECTOR, 'input.el_18.submit.nice_button').click()

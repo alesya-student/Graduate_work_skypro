@@ -10,10 +10,11 @@ from page.MainPage import Main
 
 @pytest.fixture()
 def browser():
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(service=ChromeService(
+                             ChromeDriverManager().install()))
     driver.implicitly_wait(5)
     driver.maximize_window()
-    yield browser
+    yield driver
     driver.quit()
 
 
@@ -26,18 +27,16 @@ def browser():
                     '"поиск: Девчата • результаты: 30"')
 @allure.severity("Blocker")
 # @pytest.mark.positive_test
-def test_search_movie__main_page():
-    browser = webdriver.Chrome(service=ChromeService
-                               (ChromeDriverManager().install()))
+def test_search_movie__main_page(browser):
     main_page = Main(browser)
     main_page.captcha()
     main_page.open_advanced_filter()
-    title_serch = main_page.serch("Девчата")
+    title_search = main_page.search("Девчата")
     title_total = main_page.title()
     with allure.step('Проверка, что название введенного фильма'
                      'соостветствует отображенному названию'
                      'в верхней плашке).'):
-        assert title_serch == title_total
+        assert title_search == title_total
 
 
 @allure.id('Kinopoisk_02')
@@ -49,21 +48,19 @@ def test_search_movie__main_page():
                     '"К сожалению, по вашему запросу ничего не найдено..."')
 @allure.severity("Minor")
 # @pytest.mark.negative_test
-def test_negative_1_serch():
-    browser = webdriver.Chrome(service=ChromeService
-                               (ChromeDriverManager().install()))
+def test_negative_1_search(browser):
     main_page = Main(browser)
     main_page.captcha()
     main_page.open_advanced_filter()
-    main_page.serch("#")
+    main_page.search("#")
     with allure.step('Проверка, что при невалидных данных'
                      '(введении символов в поле поиска) видим сообщение:'
                      '"К сожалению, по вашему запросу ничего не найдено...".'):
-        massege = main_page.driver.find_element(By.XPATH,
+        message = main_page.driver.find_element(By.XPATH,
                                                 '//*[@id="block_left_pad"]'
                                                 '/div/table/tbody/tr[1]/td/h2'
                                                 ).text
-        assert massege == "К сожалению, по вашему запросу ничего не найдено..."
+        assert message == "К сожалению, по вашему запросу ничего не найдено..."
 
 
 @allure.id('Kinopoisk_03')
@@ -76,21 +73,19 @@ def test_negative_1_serch():
                     '"К сожалению,по вашему запросу ничего не найдено..."')
 @allure.severity("Minor")
 # @pytest.mark.negative_test
-def test_negative_2_serch():
-    browser = webdriver.Chrome(service=ChromeService
-                               (ChromeDriverManager().install()))
+def test_negative_2_search(browser):
     main_page = Main(browser)
     main_page.captcha()
     main_page.open_advanced_filter()
-    main_page.serch("dkjbuufkflf")
+    main_page.search("dkjbuufkflf")
     with allure.step('Проверка, что при невалидных данных'
                      '(введении символов в поле поиска) видим сообщение:'
                      '"К сожалению, по вашему запросу ничего не найдено...".'):
-        massege = main_page.driver.find_element(By.XPATH,
+        message = main_page.driver.find_element(By.XPATH,
                                                 '//*[@id="block_left_pad"]'
                                                 '/div/table/tbody/tr[1]/td/h2'
                                                 ).text
-        assert massege == "К сожалению, по вашему запросу ничего не найдено..."
+        assert message == "К сожалению, по вашему запросу ничего не найдено..."
 
 
 @allure.id('KinopoisK_04')
@@ -101,9 +96,7 @@ def test_negative_2_serch():
                     'убедиться, что результат поиска соответствует ожиданиям')
 @allure.severity("Critical")
 # @pytest.mark.positive_test
-def test_positive_2_serch():
-    browser = webdriver.Chrome(service=ChromeService
-                               (ChromeDriverManager().install()))
+def test_positive_2_search(browser):
     main_page = Main(browser)
     main_page.captcha()
     main_page.open_advanced_filter()
@@ -111,7 +104,7 @@ def test_positive_2_serch():
                      'названия фильма (title) и год (year).'):
         title = "Девчата"
         year = "1961"
-    main_page.serch_title_year(title, year)
+    main_page.search_title_year(title, year)
     with allure.step('Проверка, что что результат поиска'
                      'соответствует ожиданиям.'):
         result = main_page.driver.find_element(By.CSS_SELECTOR,
@@ -127,13 +120,11 @@ def test_positive_2_serch():
 @allure.description('')
 @allure.severity("Blocker")
 # @pytest.mark.positive_test
-def test_positive_button():
-    browser = webdriver.Chrome(service=ChromeService
-                               (ChromeDriverManager().install()))
+def test_positive_button(browser):
     main_page = Main(browser)
     main_page.captcha()
     main_page.open_advanced_filter()
-    main_page.serch_title_year("Девчата", "1961")
+    main_page.search_title_year("Девчата", "1961")
     with allure.step('Нажать на кнопку "Смотреть фильм",'
                      'убедиться, что осуществлен переход'
                      ' на страницу авторизации'):
@@ -150,9 +141,7 @@ def test_positive_button():
                     '"Можно зарегистрировать новый аккаунт".')
 @allure.severity("Blocker")
 # @pytest.mark.positive_test
-def test_pozitive_phone_not_registered():
-    browser = webdriver.Chrome(service=ChromeService
-                               (ChromeDriverManager().install()))
+def test_pozitive_phone_not_registered(browser):
     main_page = Main(browser)
     main_page.captcha()
     main_page.entrance_personal_account()
@@ -167,12 +156,12 @@ def test_pozitive_phone_not_registered():
     with allure.step('Проверка, что в случае если номер не зарегистрирован,'
                      'то получаем сообщение:'
                      '"Можно зарегистрировать новый аккаунт".'):
-        massege = main_page.driver.find_element(By.XPATH, '//*[@id="root"]/'
+        message = main_page.driver.find_element(By.XPATH, '//*[@id="root"]/'
                                                 'div/div[2]/div[2]/'
                                                 'div/div/div[2]/div[3]/'
                                                 'div/form/div/div[2]/div'
                                                 ).text
-        assert massege == "Можно зарегистрировать новый аккаунт"
+        assert message == "Можно зарегистрировать новый аккаунт"
 
 
 @allure.id('KinopoisK_07')
@@ -184,9 +173,7 @@ def test_pozitive_phone_not_registered():
                     '"Проверьте пуш-уведомления".')
 @allure.severity("Blocker")
 # @pytest.mark.positive_test
-def test_pozitive_phone_registered():
-    browser = webdriver.Chrome(service=ChromeService
-                               (ChromeDriverManager().install()))
+def test_pozitive_phone_registered(browser):
     main_page = Main(browser)
     main_page.captcha()
     main_page.entrance_personal_account()
@@ -200,11 +187,11 @@ def test_pozitive_phone_registered():
     with allure.step('Провека, что в случае если номер не зарегистрирован,'
                      'то получаем сообщение:'
                      '"Проверьте пуш-уведомления".'):
-        massege = main_page.driver.find_element(By.XPATH,
+        message = main_page.driver.find_element(By.XPATH,
                                                 '//*[@id="UserEntryFlow"]/'
                                                 'form/div/div[2]/div/h4'
                                                 ).text
-        assert massege == "Проверьте пуш-уведомления"
+        assert message == "Проверьте пуш-уведомления"
 
 
 @allure.id('KinopoisK_08')
@@ -216,9 +203,7 @@ def test_pozitive_phone_registered():
                     '"Недопустимый формат номера".')
 @allure.severity("Minor")
 # @pytest.mark.negative_test
-def test_negative_phone():
-    browser = webdriver.Chrome(service=ChromeService
-                               (ChromeDriverManager().install()))
+def test_negative_phone(browser):
     main_page = Main(browser)
     main_page.captcha()
     main_page.entrance_personal_account()
@@ -232,7 +217,7 @@ def test_negative_phone():
     with allure.step('Проверка, что в случае если номер не валидный,'
                      'то получаем сообщение:'
                      '"Недопустимый формат номера".'):
-        massege = main_page.driver.find_element(By.CSS_SELECTOR,
+        message = main_page.driver.find_element(By.CSS_SELECTOR,
                                                 '[id="field:input-phone:hint"]'
                                                 ).text
-        assert massege == "Недопустимый формат номера"
+        assert message == "Недопустимый формат номера"
